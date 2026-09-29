@@ -1,9 +1,10 @@
 /**
- * GNOME Shell extenstion to hide the Activities button from the status bar.
+ * GNOME Shell extension to hide the Activities button from the status bar.
  *
  * Created by Shay Elkin <shay@shayel.org>
  *
  * Updated by zeten30@gmail.com
+ * Updated by nathan.townshend@calytrix.com
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -15,26 +16,24 @@
  *
  **/
 
+import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-let monitorsChangedEvent = null;
+export default class HideActivitiesExtension extends Extension
+{
+	monitorsChangedEvent = null;
 
-function hideIndicator() {
-    let indicator = Main.panel.statusArea['activities'];
-    if(indicator != null) {
-        indicator.hide();
-    }
-}
+	getIndicator = () => Main.panel.statusArea['activities'];
 
-function enable() {
-    monitorsChangedEvent = Main.layoutManager.connect('monitors-changed', hideIndicator);
-    hideIndicator();
-}
+	enable()
+	{
+		this.monitorsChangedEvent = Main.layoutManager.connect( 'monitors-changed', () => this.getIndicator()?.hide() );
+		this.getIndicator()?.hide();
+	}
 
-function disable() {
-    Main.layoutManager.disconnect(monitorsChangedEvent);
-    let indicator = Main.panel.statusArea['activities'];
-    if(indicator != null) {
-        indicator.show();
-    }
+	disable()
+	{
+		Main.layoutManager.disconnect( this.monitorsChangedEvent );
+		this.getIndicator()?.show();
+	}
 }
